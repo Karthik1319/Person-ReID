@@ -9,7 +9,13 @@ from data_loader import Market1501
 from utils import evaluate_ranked_list
 from distances import mahalanobis_dist_from_vectors
 
-DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+if torch.backends.mps.is_available():
+    DEVICE = torch.device("mps")
+elif torch.cuda.is_available():
+    DEVICE = torch.device("cuda")
+else:
+    DEVICE = torch.device("cpu")
+
 
 def evaluate_reid(model, policy_network, dataloader, use_rl=False):
     model.eval()
@@ -24,7 +30,7 @@ def evaluate_reid(model, policy_network, dataloader, use_rl=False):
             gallery_feats.append(model.extract_features(batch).cpu())
     gallery_feats = torch.cat(gallery_feats, dim=0)
 
-    query_imgs, query_labels, query_cams = dataloader.get_full_gallery()
+    query_imgs, query_labels, query_cams = dataloader.get_full_query()
     query_feats = []
     with torch.no_grad():
         for i in tqdm(range(0, len(query_imgs), 64), desc="Query Features"):

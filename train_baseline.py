@@ -12,7 +12,13 @@ from data_loader import Market1501
 from distances import mahalanobis_dist_from_features
 
 # --- Configuration ---
-DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+if torch.backends.mps.is_available():
+    DEVICE = torch.device("mps")
+elif torch.cuda.is_available():
+    DEVICE = torch.device("cuda")
+else:
+    DEVICE = torch.device("cpu")
+
 
 # This class acts as a bridge between the Market1501 loader and a standard DataLoader
 class MarketClassificationDataset(Dataset):
